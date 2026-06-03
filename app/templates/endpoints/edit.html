@@ -1,0 +1,372 @@
+{% extends "partials/base.html" %}
+
+{% block title %}Edit Endpoint · Billson's Forms{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Edit Endpoint</h1>
+    <p>
+        Update endpoint settings for
+        <strong>{{ endpoint.name }}</strong>.
+    </p>
+</section>
+
+{% if error %}
+<div class="alert alert-danger">
+    {{ error }}
+</div>
+{% endif %}
+
+<form method="post" action="/endpoints/{{ endpoint.id }}/edit" class="endpoint-form">
+
+    <section class="card">
+
+        <h2>General</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="name">Endpoint Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ form.name }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="slug">Slug</label>
+                <input
+                    type="text"
+                    id="slug"
+                    name="slug"
+                    value="{{ form.slug }}"
+                    required
+                >
+                <small>
+                    Endpoint URL:
+                    <code>/api/v1/forms/{{ form.slug }}</code>
+                </small>
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+                id="description"
+                name="description"
+                rows="3"
+            >{{ form.description }}</textarea>
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>Recipients</h2>
+
+        <div class="form-group">
+            <label for="recipients">
+                Recipient Email Addresses
+            </label>
+
+            <textarea
+                id="recipients"
+                name="recipients"
+                rows="5"
+                required
+            >{{ form.recipients }}</textarea>
+
+            <small>
+                One email address per line.
+            </small>
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>Email Settings</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="sender_email">Sender Email</label>
+                <input
+                    type="email"
+                    id="sender_email"
+                    name="sender_email"
+                    value="{{ form.sender_email }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="sender_name">Sender Name</label>
+                <input
+                    type="text"
+                    id="sender_name"
+                    name="sender_name"
+                    value="{{ form.sender_name }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="reply_to_field">
+                    Reply-To Field Name
+                </label>
+                <input
+                    type="text"
+                    id="reply_to_field"
+                    name="reply_to_field"
+                    value="{{ form.reply_to_field }}"
+                >
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>SMTP</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="smtp_host">SMTP Host</label>
+                <input
+                    type="text"
+                    id="smtp_host"
+                    name="smtp_host"
+                    value="{{ form.smtp_host }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="smtp_port">SMTP Port</label>
+                <input
+                    type="number"
+                    id="smtp_port"
+                    name="smtp_port"
+                    value="{{ form.smtp_port }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="smtp_username">SMTP Username</label>
+                <input
+                    type="text"
+                    id="smtp_username"
+                    name="smtp_username"
+                    value="{{ form.smtp_username }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="smtp_password">
+                    SMTP Password
+                </label>
+                <input
+                    type="password"
+                    id="smtp_password"
+                    name="smtp_password"
+                >
+                <small>
+                    Leave blank to keep the current password.
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="smtp_security">SMTP Security</label>
+
+                <select
+                    id="smtp_security"
+                    name="smtp_security"
+                >
+                    <option value="none"
+                        {% if form.smtp_security == "none" %}selected{% endif %}>
+                        None
+                    </option>
+
+                    <option value="starttls"
+                        {% if form.smtp_security == "starttls" %}selected{% endif %}>
+                        STARTTLS
+                    </option>
+
+                    <option value="ssl"
+                        {% if form.smtp_security == "ssl" %}selected{% endif %}>
+                        SSL/TLS
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>CAP.js</h2>
+
+        <div class="form-checkbox">
+            <label>
+                <input
+                    type="checkbox"
+                    name="cap_enabled"
+                    value="true"
+                    {% if form.cap_enabled %}
+                        checked
+                    {% endif %}
+                >
+                Enable CAP Verification
+            </label>
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="cap_verify_url">
+                    Verification URL
+                </label>
+                <input
+                    type="text"
+                    id="cap_verify_url"
+                    name="cap_verify_url"
+                    value="{{ form.cap_verify_url }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="cap_site_key">
+                    Site Key
+                </label>
+                <input
+                    type="text"
+                    id="cap_site_key"
+                    name="cap_site_key"
+                    value="{{ form.cap_site_key }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="cap_secret_key">
+                    Secret Key
+                </label>
+                <input
+                    type="password"
+                    id="cap_secret_key"
+                    name="cap_secret_key"
+                >
+                <small>
+                    Leave blank to keep the current secret key.
+                </small>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>Security & Behaviour</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="allowed_origins">
+                    Allowed Origins
+                </label>
+
+                <textarea
+                    id="allowed_origins"
+                    name="allowed_origins"
+                    rows="5"
+                >{{ form.allowed_origins }}</textarea>
+
+                <small>
+                    One origin per line.
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="max_payload_kb">
+                    Maximum Payload Size (KB)
+                </label>
+                <input
+                    type="number"
+                    id="max_payload_kb"
+                    name="max_payload_kb"
+                    value="{{ form.max_payload_kb }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="success_redirect_url">
+                    Success Redirect URL
+                </label>
+                <input
+                    type="text"
+                    id="success_redirect_url"
+                    name="success_redirect_url"
+                    value="{{ form.success_redirect_url }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="error_redirect_url">
+                    Error Redirect URL
+                </label>
+                <input
+                    type="text"
+                    id="error_redirect_url"
+                    name="error_redirect_url"
+                    value="{{ form.error_redirect_url }}"
+                >
+            </div>
+
+        </div>
+
+        <div class="form-checkbox">
+            <label>
+                <input
+                    type="checkbox"
+                    name="is_active"
+                    value="true"
+                    {% if form.is_active %}
+                        checked
+                    {% endif %}
+                >
+                Endpoint Active
+            </label>
+        </div>
+
+    </section>
+
+    <section class="page-actions">
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Save Changes
+        </button>
+
+        <a
+            href="/endpoints/{{ endpoint.id }}"
+            class="btn"
+        >
+            Cancel
+        </a>
+
+    </section>
+
+</form>
+
+{% endblock %}

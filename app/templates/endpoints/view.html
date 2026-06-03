@@ -1,0 +1,167 @@
+{% extends "partials/base.html" %}
+
+{% block title %}{{ endpoint.name }} · Billson's Forms{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>{{ endpoint.name }}</h1>
+    <p>{{ endpoint.description or "Endpoint details and recent delivery metadata." }}</p>
+</section>
+
+<section class="page-actions">
+    <a href="/endpoints/{{ endpoint.id }}/edit" class="btn btn-primary">Edit Endpoint</a>
+    <a href="/endpoints" class="btn">Back to Endpoints</a>
+
+    <form method="post" action="/endpoints/{{ endpoint.id }}/delete" class="inline-form">
+        <button type="submit" class="btn btn-danger">
+            Delete Endpoint
+        </button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Endpoint URL</h2>
+    <p>
+        <code>POST /api/v1/forms/{{ endpoint.slug }}</code>
+    </p>
+</section>
+
+<section class="card-grid">
+    <article class="card">
+        <h2>Status</h2>
+        {% if endpoint.is_active %}
+            <span class="badge badge-success">Active</span>
+        {% else %}
+            <span class="badge badge-muted">Disabled</span>
+        {% endif %}
+    </article>
+
+    <article class="card">
+        <h2>Sender</h2>
+        <p>{{ endpoint.sender_name or "No sender name" }}</p>
+        <p><code>{{ endpoint.sender_email }}</code></p>
+    </article>
+
+    <article class="card">
+        <h2>SMTP</h2>
+        <p><code>{{ endpoint.smtp_host }}:{{ endpoint.smtp_port }}</code></p>
+        <p>{{ endpoint.smtp_security|upper }}</p>
+    </article>
+
+    <article class="card">
+        <h2>CAP.js</h2>
+        {% if endpoint.cap_enabled %}
+            <span class="badge badge-success">Enabled</span>
+        {% else %}
+            <span class="badge badge-muted">Disabled</span>
+        {% endif %}
+    </article>
+</section>
+
+<section class="card">
+    <h2>Recipients</h2>
+
+    {% if recipients %}
+        <ul class="plain-list">
+            {% for recipient in recipients %}
+                <li>
+                    <code>{{ recipient.email }}</code>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="muted">No active recipients configured.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Allowed Origins</h2>
+
+    {% if allowed_origins %}
+        <ul class="plain-list">
+            {% for origin in allowed_origins %}
+                <li><code>{{ origin }}</code></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="muted">
+            No allowed origins configured. Requests without an Origin header are allowed.
+        </p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Recent Delivery Logs</h2>
+
+    {% if delivery_logs %}
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Origin</th>
+                        <th>CAP</th>
+                        <th>Payload</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for log in delivery_logs %}
+                    <tr>
+                        <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+
+                        <td>
+                            {% if log.success %}
+                                <span class="badge badge-success">Success</span>
+                            {% else %}
+                                <span class="badge badge-danger">Failed</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.origin %}
+                                <code>{{ log.origin }}</code>
+                            {% else %}
+                                <span class="table-muted">No origin</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.cap_verified %}
+                                <span class="badge badge-success">Verified</span>
+                            {% else %}
+                                <span class="badge badge-muted">Not verified</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.payload_size_bytes %}
+                                {{ log.payload_size_bytes }} bytes
+                            {% else %}
+                                <span class="table-muted">Unknown</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.error_message %}
+                                <span class="table-error">{{ log.error_message }}</span>
+                            {% else %}
+                                <span class="table-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% else %}
+        <p class="muted">No delivery logs yet.</p>
+    {% endif %}
+</section>
+
+{% endblock %}

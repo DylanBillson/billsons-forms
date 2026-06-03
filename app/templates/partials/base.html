@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Billson's Forms{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <header class="topbar">
+        <div class="topbar-brand">
+            <a href="/dashboard">Billson's Forms</a>
+        </div>
+
+        <nav class="topbar-nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/endpoints">Endpoints</a>
+
+            {% if current_user is defined and current_user and current_user.role == "admin" %}
+                <a href="/admin/users">Users</a>
+                <a href="/admin/audit">Audit</a>
+            {% endif %}
+        </nav>
+
+        {% if current_user is defined and current_user %}
+            <div class="topbar-user">
+                <span>{{ current_user.display_name }}</span>
+                <form method="post" action="/logout">
+                    <button type="submit" class="btn btn-small">Logout</button>
+                </form>
+            </div>
+        {% endif %}
+    </header>
+
+    <main class="content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</div>
+
+</body>
+</html>

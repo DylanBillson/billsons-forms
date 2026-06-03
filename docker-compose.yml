@@ -1,0 +1,45 @@
+services:
+  app:
+    build: .
+    container_name: billsons_forms_app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - ./data/uploads:/data/uploads
+      - ./data/exports:/data/exports
+      - ./data/generated:/data/generated
+      - ./data/temp:/data/temp
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - default
+      - edge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.billsons-forms.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.billsons-forms.entrypoints=websecure"
+      - "traefik.http.routers.billsons-forms.tls.certresolver=letsencrypt"
+      - "traefik.http.services.billsons-forms.loadbalancer.server.port=8000"
+
+  db:
+    image: postgres:17
+    container_name: billsons_forms_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+
+networks:
+  edge:
+    external: true

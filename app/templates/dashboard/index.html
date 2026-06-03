@@ -1,0 +1,26 @@
+{% extends "partials/base.html" %}
+
+{% block title %}Dashboard · Billson's Forms{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back, {{ current_user.display_name }}.</p>
+</section>
+
+<section class="card-grid">
+    <article class="card">
+        <h2>Endpoints</h2>
+        <p>Create and manage website form endpoints.</p>
+        <a href="/endpoints" class="btn btn-primary">Manage endpoints</a>
+    </article>
+
+    {% if current_user.role == "admin" %}
+    <article class="card">
+        <h2>Admin</h2>
+        <p>Manage users, settings, audit logs and system configuration.</p>
+        <a href="/admin/users" class="btn btn-primary">Open admin</a>
+    </article>
+    {% endif %}
+</section>
+{% endblock %}

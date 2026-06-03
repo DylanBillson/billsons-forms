@@ -1,0 +1,198 @@
+{% extends "partials/base.html" %}
+
+{% block title %}Edit User · Billson's Forms{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Edit User</h1>
+    <p>
+        Update user account details and permissions.
+    </p>
+</section>
+
+{% if error %}
+<section class="alert alert-danger">
+    {{ error }}
+</section>
+{% endif %}
+
+<section class="card">
+
+    <form method="post" action="/admin/users/{{ user.id }}/edit" class="form">
+
+        <div class="form-group">
+            <label for="username">
+                Username
+            </label>
+
+            <input
+                type="text"
+                id="username"
+                name="username"
+                value="{{ form.username }}"
+                required
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="display_name">
+                Display Name
+            </label>
+
+            <input
+                type="text"
+                id="display_name"
+                name="display_name"
+                value="{{ form.display_name }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password">
+                New Password
+            </label>
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+            >
+
+            <div class="form-help">
+                Leave blank to keep the current password.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="role">
+                Role
+            </label>
+
+            <select
+                id="role"
+                name="role"
+            >
+                <option
+                    value="user"
+                    {% if form.role == "user" %}
+                        selected
+                    {% endif %}
+                >
+                    User
+                </option>
+
+                <option
+                    value="admin"
+                    {% if form.role == "admin" %}
+                        selected
+                    {% endif %}
+                >
+                    Admin
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+            <label>
+                <input
+                    type="checkbox"
+                    name="is_active"
+                    value="true"
+                    {% if form.is_active %}
+                        checked
+                    {% endif %}
+                >
+
+                Active User
+            </label>
+
+            <div class="form-help">
+                Disabled users cannot sign in.
+            </div>
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Save Changes
+            </button>
+
+            <a
+                href="/admin/users"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</section>
+
+<section class="card">
+
+    <h2>Account Information</h2>
+
+    <dl class="details-grid">
+
+        <dt>User ID</dt>
+        <dd>{{ user.id }}</dd>
+
+        <dt>Created</dt>
+        <dd>{{ user.created_at.strftime("%d/%m/%Y %H:%M") }}</dd>
+
+        <dt>Last Updated</dt>
+        <dd>{{ user.updated_at.strftime("%d/%m/%Y %H:%M") }}</dd>
+
+        <dt>Status</dt>
+        <dd>
+            {% if user.is_active %}
+                <span class="badge badge-success">
+                    Active
+                </span>
+            {% else %}
+                <span class="badge badge-danger">
+                    Disabled
+                </span>
+            {% endif %}
+        </dd>
+
+    </dl>
+
+</section>
+
+{% if user.id != current_user.id %}
+
+<section class="card card-danger">
+
+    <h2>Danger Zone</h2>
+
+    <p>
+        Disable this account and prevent future logins.
+    </p>
+
+    <form
+        method="post"
+        action="/admin/users/{{ user.id }}/deactivate"
+        onsubmit="return confirm('Disable this user account?');"
+    >
+        <button
+            type="submit"
+            class="btn btn-danger"
+        >
+            Disable User
+        </button>
+    </form>
+
+</section>
+
+{% endif %}
+
+{% endblock %}

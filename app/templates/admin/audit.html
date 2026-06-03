@@ -1,0 +1,100 @@
+{% extends "partials/base.html" %}
+
+{% block title %}Audit Log · Billson's Forms{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Audit Log</h1>
+    <p>
+        Recent system activity across users, endpoints and administration.
+    </p>
+</section>
+
+<section class="card">
+
+    {% if audit_logs %}
+
+    <div class="table-container">
+
+        <table class="table">
+
+            <thead>
+                <tr>
+                    <th>Date / Time</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>IP Address</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for log in audit_logs %}
+                <tr>
+
+                    <td>
+                        {{ log.created_at.strftime("%d/%m/%Y %H:%M:%S") }}
+                    </td>
+
+                    <td>
+                        {% if log.username %}
+                            {{ log.username }}
+                        {% else %}
+                            <span class="table-muted">
+                                System
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <strong>{{ log.action }}</strong>
+                    </td>
+
+                    <td>
+                        {% if log.ip_address %}
+                            <code>{{ log.ip_address }}</code>
+                        {% else %}
+                            <span class="table-muted">
+                                —
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if log.details %}
+                            {{ log.details }}
+                        {% else %}
+                            <span class="table-muted">
+                                —
+                            </span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <h2>No audit entries found</h2>
+
+        <p>
+            Audit records will appear here as users interact with the system.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

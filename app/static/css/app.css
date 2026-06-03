@@ -1,0 +1,319 @@
+:root {
+  --bg: #0B1020;
+  --panel: #1F2937;
+  --panel-2: #111827;
+  --border: #374151;
+  --text: #F9FAFB;
+  --muted: #9CA3AF;
+  --accent: #38BDF8;
+  --danger: #EF4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 64px;
+  padding: 0 1.5rem;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-brand a {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.topbar-nav {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.topbar-nav a {
+  color: var(--muted);
+}
+
+.topbar-nav a:hover {
+  color: var(--text);
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted);
+}
+
+.content {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  margin: 0 0 0.5rem 0;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.card,
+.auth-card {
+  padding: 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.card p {
+  color: var(--muted);
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: min(420px, 100%);
+}
+
+.auth-header {
+  margin-bottom: 1.5rem;
+}
+
+.auth-header h1 {
+  margin: 0 0 0.5rem 0;
+}
+
+.auth-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-group {
+  display: grid;
+  gap: 0.4rem;
+}
+
+label {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn-small {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #06111f;
+  border-color: var(--accent);
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+
+.alert-danger {
+  border-color: var(--danger);
+  color: #FCA5A5;
+  background: rgba(239, 68, 68, 0.08);
+}
+.page-actions {
+  margin-bottom: 1.5rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.table th,
+.table td {
+  padding: 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  color: var(--muted);
+  font-weight: 600;
+  background: var(--panel-2);
+}
+
+.table code {
+  color: var(--accent);
+}
+
+.table-muted {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.badge-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+}
+
+.badge-muted {
+  background: rgba(156, 163, 175, 0.15);
+  color: #d1d5db;
+}
+
+.empty-state {
+  text-align: center;
+}
+.endpoint-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.form-checkbox {
+  margin-top: 1rem;
+}
+
+.form-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-checkbox input[type="checkbox"] {
+  width: auto;
+}
+
+textarea {
+  resize: vertical;
+}
+
+small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted);
+}
+.inline-form {
+  display: inline;
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: #FCA5A5;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #FCA5A5;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.table-error {
+  color: #FCA5A5;
+}

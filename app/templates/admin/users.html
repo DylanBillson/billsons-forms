@@ -1,0 +1,140 @@
+{% extends "partials/base.html" %}
+
+{% block title %}Users · Billson's Forms{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Users</h1>
+    <p>
+        Manage application users and permissions.
+    </p>
+</section>
+
+<section class="page-actions">
+    <a href="/admin/users/new" class="btn btn-primary">
+        New User
+    </a>
+
+    <a href="/admin/audit" class="btn btn-secondary">
+        Audit Log
+    </a>
+</section>
+
+{% if users %}
+
+<div class="table-container">
+
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Display Name</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for user in users %}
+            <tr>
+
+                <td>
+                    <strong>{{ user.username }}</strong>
+                </td>
+
+                <td>
+                    {{ user.display_name }}
+                </td>
+
+                <td>
+                    {% if user.role == "admin" %}
+                        <span class="badge badge-primary">
+                            Admin
+                        </span>
+                    {% else %}
+                        <span class="badge badge-muted">
+                            User
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if user.is_active %}
+                        <span class="badge badge-success">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="badge badge-danger">
+                            Disabled
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ user.created_at.strftime("%d/%m/%Y") }}
+                </td>
+
+                <td>
+
+                    <div class="table-actions">
+
+                        <a
+                            href="/admin/users/{{ user.id }}/edit"
+                            class="btn btn-small"
+                        >
+                            Edit
+                        </a>
+
+                        {% if user.id != current_user.id and user.is_active %}
+                        <form
+                            method="post"
+                            action="/admin/users/{{ user.id }}/deactivate"
+                            style="display:inline;"
+                            onsubmit="return confirm('Deactivate this user?');"
+                        >
+                            <button
+                                type="submit"
+                                class="btn btn-small btn-danger"
+                            >
+                                Disable
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </div>
+
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% else %}
+
+<section class="card empty-state">
+
+    <h2>No users found</h2>
+
+    <p>
+        Create your first user account.
+    </p>
+
+    <a href="/admin/users/new" class="btn btn-primary">
+        Create User
+    </a>
+
+</section>
+
+{% endif %}
+
+{% endblock %}

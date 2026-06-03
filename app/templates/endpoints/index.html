@@ -1,0 +1,111 @@
+{% extends "partials/base.html" %}
+
+{% block title %}Endpoints · Billson's Forms{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Endpoints</h1>
+    <p>Create and manage website form endpoints.</p>
+</section>
+
+<section class="page-actions">
+    <a href="/endpoints/new" class="btn btn-primary">
+        New Endpoint
+    </a>
+</section>
+
+{% if endpoints %}
+
+<div class="table-container">
+
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Status</th>
+                <th>Sender Email</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for endpoint in endpoints %}
+            <tr>
+
+                <td>
+                    <strong>
+                        <a href="/endpoints/{{ endpoint.id }}">
+                            {{ endpoint.name }}
+                        </a>
+                    </strong>
+
+                    {% if endpoint.description %}
+                        <div class="table-muted">
+                            {{ endpoint.description }}
+                        </div>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <code>/api/v1/forms/{{ endpoint.slug }}</code>
+                </td>
+
+                <td>
+                    {% if endpoint.is_active %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-muted">Disabled</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ endpoint.sender_email }}
+                </td>
+
+                <td>
+                    {{ endpoint.created_at.strftime("%d/%m/%Y") }}
+                </td>
+
+                <td class="table-actions">
+                    <a href="/endpoints/{{ endpoint.id }}" class="btn btn-small">
+                        View
+                    </a>
+
+                    <a href="/endpoints/{{ endpoint.id }}/edit" class="btn btn-small">
+                        Edit
+                    </a>
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% else %}
+
+<section class="card empty-state">
+
+    <h2>No endpoints yet</h2>
+
+    <p>
+        Create your first endpoint to start receiving form submissions.
+    </p>
+
+    <a href="/endpoints/new" class="btn btn-primary">
+        Create Endpoint
+    </a>
+
+</section>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login · Billson's Forms</title>
+
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+    <main class="auth-page">
+
+        <section class="auth-card">
+
+            <div class="auth-header">
+                <h1>Billson's Forms</h1>
+                <p>Sign in to continue</p>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/login" class="auth-form">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Sign In
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
