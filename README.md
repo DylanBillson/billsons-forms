@@ -2,11 +2,9 @@
 
 Billson's Forms is a self-hosted form backend and management platform for websites.
 
-It allows administrators to create form endpoints through a web interface, configure email delivery settings, manage users, audit activity, and receive website form submissions without relying on third-party services.
+Create form endpoints through a web interface, route submissions directly to email, manage users, audit activity, and maintain complete ownership of your data without relying on third-party form services.
 
-Designed as part of the Billson Stack, Billson's Forms prioritises simplicity, self-hosting, auditability, and deployment flexibility.
-
----
+Designed as part of the Billson Stack, Billson's Forms prioritises simplicity, self-hosting, privacy, auditability, and deployment flexibility.
 
 ## Features
 
@@ -24,10 +22,11 @@ Each endpoint supports:
 * Optional CAP integration
 * Success and error redirects
 * Endpoint activation/deactivation
+* Soft deletion
 
 Example endpoint:
 
-```
+```http
 POST /api/v1/forms/contact-us
 ```
 
@@ -45,6 +44,7 @@ Supported features:
 * Custom sender name
 * Custom sender address
 * Multiple recipients
+* Encrypted SMTP credentials
 
 Unlike many form platforms, Billson's Forms does not require a central email provider and can integrate with existing mail infrastructure.
 
@@ -71,6 +71,8 @@ Stored delivery metadata includes:
 * User-Agent
 * Payload size
 * Delivery error messages
+
+This approach allows administrators to troubleshoot delivery issues while minimising retained personal data.
 
 ---
 
@@ -102,7 +104,9 @@ Examples include:
 * Endpoint creation
 * Endpoint updates
 * Endpoint deletion
-* User management actions
+* User creation
+* User updates
+* User deactivation
 
 Audit logs provide accountability and operational visibility.
 
@@ -112,13 +116,14 @@ Audit logs provide accountability and operational visibility.
 
 Billson's Forms includes:
 
-* Password hashing using Argon2
+* Argon2 password hashing
 * Secure session management
 * Encrypted SMTP credentials
 * Encrypted CAP credentials
 * Origin restrictions
 * Audit logging
 * Soft deletion support
+* Role-based administration
 
 ---
 
@@ -142,45 +147,93 @@ Billson's Forms includes:
 
 * Docker
 * Docker Compose
+* GitHub Container Registry (GHCR)
 
 ---
 
-## Installation
+## Quick Start (Docker)
 
-### Clone Repository
+Pull the latest image:
+
+```bash
+docker pull ghcr.io/dylanbillson/billsons-forms:latest
+```
+
+Example Docker Compose:
+
+```yaml
+services:
+
+  app:
+    image: ghcr.io/dylanbillson/billsons-forms:latest
+    container_name: billsons_forms_app
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    container_name: billsons_forms_db
+    environment:
+      POSTGRES_DB: billsons_forms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: change-me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+```
+
+Start services:
+
+```bash
+docker compose up -d
+```
+
+Run migrations:
+
+```bash
+docker compose exec app alembic upgrade head
+```
+
+Create the first administrator:
+
+```bash
+docker compose exec app python -m app.scripts.create_admin
+```
+
+---
+
+## Development Installation
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/DylanBillson/billsons-forms.git
 cd billsons-forms
 ```
 
-### Create Environment File
+Create your environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit the environment file to suit your deployment.
-
----
-
-### Start Services
+Start services:
 
 ```bash
 docker compose up -d
 ```
 
----
-
-### Run Database Migrations
+Apply migrations:
 
 ```bash
 docker compose exec app alembic upgrade head
 ```
 
----
-
-### Create Initial Administrator
+Create an administrator:
 
 ```bash
 docker compose exec app python -m app.scripts.create_admin
@@ -194,13 +247,17 @@ HTML:
 
 ```html
 <form method="post" action="https://forms.example.com/api/v1/forms/contact">
+
     <input type="text" name="name">
+
     <input type="email" name="email">
+
     <textarea name="message"></textarea>
 
     <button type="submit">
         Send
     </button>
+
 </form>
 ```
 
@@ -220,19 +277,15 @@ Example:
 POST /api/v1/forms/contact-us
 ```
 
-Form data is accepted as:
+Supported content types:
 
-```
+```text
 application/x-www-form-urlencoded
 ```
 
-and
-
-```
+```text
 multipart/form-data
 ```
-
-depending on implementation.
 
 ---
 
@@ -251,17 +304,17 @@ HTTPS termination should normally be handled by the reverse proxy.
 
 ## Development
 
-### Run Migrations
+### Generate a Migration
 
 ```bash
 docker compose exec app alembic revision --autogenerate -m "description"
 ```
 
+### Apply Migrations
+
 ```bash
 docker compose exec app alembic upgrade head
 ```
-
----
 
 ### View Logs
 
@@ -269,9 +322,7 @@ docker compose exec app alembic upgrade head
 docker compose logs -f app
 ```
 
----
-
-### Access Database
+### Access PostgreSQL
 
 ```bash
 docker compose exec db psql -U postgres
@@ -279,11 +330,9 @@ docker compose exec db psql -U postgres
 
 ---
 
-## Project Status
+## Current Functionality
 
-Billson's Forms is under active development.
-
-Current functionality includes:
+Current v1 functionality includes:
 
 * Authentication
 * Session management
@@ -292,8 +341,8 @@ Current functionality includes:
 * User management
 * Audit logging
 * Administrative interface
-
-Additional features may be added in future releases.
+* SMTP credential encryption
+* Delivery metadata logging
 
 ---
 
@@ -309,7 +358,15 @@ Billson's Forms follows several core principles:
 * Human-readable configuration
 * Full ownership of data
 
-The project aims to provide a lightweight alternative to hosted form platforms while remaining easy to deploy and manage.
+The project aims to provide a lightweight alternative to hosted form platforms while remaining easy to deploy, audit, and maintain.
+
+---
+
+## Part of the Billson Stack
+
+Billson's Forms is one of several self-hosted applications developed as part of the Billson Stack project.
+
+The Billson Stack focuses on practical, self-hosted software that is simple to deploy, easy to maintain, and built around long-term operational ownership.
 
 ---
 
