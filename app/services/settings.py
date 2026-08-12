@@ -86,7 +86,11 @@ def ensure_default_settings(
         "site_name": "Billson's Forms",
         "default_timezone": "Europe/London",
         "public_base_url": "https://test.billson.xyz",
-        "delivery_log_retention_days": "90",
+        "delivery_log_retention_days": "365",
+        "audit_log_retention_days": "730",
+        "expired_session_retention_days": "30",
+        "rate_limit_retention_hours": "0",
+        "queue_terminal_retention_days": "7",
     }
 
     changed = False

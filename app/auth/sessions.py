@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from app.core.security import generate_session_token, hash_token, verify_token
 from app.db.models.user import User
 from app.db.models.user_session import UserSession
+from app.core.config import settings
 
 
 SESSION_COOKIE_NAME = "billsons_forms_session"
-SESSION_DAYS = 14
 
 
 def create_user_session(
@@ -22,7 +22,7 @@ def create_user_session(
     session = UserSession(
         user_id=user.id,
         session_token_hash=hash_token(raw_token),
-        expires_at=datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS),
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=settings.session_lifetime_hours),
         ip_address=ip_address,
         user_agent=user_agent,
     )
@@ -81,3 +81,7 @@ def delete_user_session(
     if session:
         db.delete(session)
         db.commit()
+
+
+def delete_user_sessions(db: Session, user_id: int) -> None:
+    db.query(UserSession).filter(UserSession.user_id == user_id).delete(synchronize_session=False)

@@ -94,9 +94,10 @@
                         <form
                             method="post"
                             action="/admin/users/{{ user.id }}/deactivate"
-                            style="display:inline;"
-                            onsubmit="return confirm('Deactivate this user?');"
+                            class="inline-form"
+                            data-confirm="Deactivate this user?"
                         >
+                            {% include "partials/csrf.html" %}
                             <button
                                 type="submit"
                                 class="btn btn-small btn-danger"

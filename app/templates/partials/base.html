@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Billson's Forms{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/app.css">
+    <script src="/static/js/app.js" defer></script>
 </head>
 <body>
 
@@ -29,6 +30,7 @@
             <div class="topbar-user">
                 <span>{{ current_user.display_name }}</span>
                 <form method="post" action="/logout">
+                    {% include "partials/csrf.html" %}
                     <button type="submit" class="btn btn-small">Logout</button>
                 </form>
             </div>

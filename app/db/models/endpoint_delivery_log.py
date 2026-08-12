@@ -31,3 +31,5 @@ class EndpointDeliveryLog(TimestampMixin, Base):
 
     payload_size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    delivery_job_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    delivery_status: Mapped[str | None] = mapped_column(String(30), nullable=True)

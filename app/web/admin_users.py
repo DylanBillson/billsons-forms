@@ -3,7 +3,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.auth.passwords import hash_password
+from app.auth.passwords import hash_password, password_errors
+from app.auth.sessions import delete_user_sessions
+from app.core.csrf import require_csrf
 from app.db.models.user import User
 from app.db.session import get_db
 from app.services.audit import create_audit_log
@@ -61,7 +63,7 @@ async def user_create_page(
     )
 
 
-@router.post("/new")
+@router.post("/new", dependencies=[Depends(require_csrf)])
 async def user_create_submit(
     request: Request,
     username: str = Form(...),
@@ -107,6 +109,14 @@ async def user_create_submit(
                 "error": "Username, display name and password are required.",
                 "form": form_data,
             },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    problems = password_errors(password, username)
+    if problems:
+        return templates.TemplateResponse(
+            "admin/user_create.html",
+            {"request": request, "current_user": current_user, "error": " ".join(problems), "form": form_data},
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -194,7 +204,7 @@ async def user_edit_page(
     )
 
 
-@router.post("/{user_id}/edit")
+@router.post("/{user_id}/edit", dependencies=[Depends(require_csrf)])
 async def user_edit_submit(
     user_id: int,
     request: Request,
@@ -268,13 +278,27 @@ async def user_edit_submit(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
+    password_changed = bool(password.strip())
+    was_active = user.is_active
+    if password_changed:
+        problems = password_errors(password.strip(), username)
+        if problems:
+            return templates.TemplateResponse(
+                "admin/user_edit.html",
+                {"request": request, "current_user": current_user, "user": user, "error": " ".join(problems), "form": form_data},
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
     user.username = username
     user.display_name = display_name
     user.role = role
     user.is_active = is_active
 
-    if password.strip():
+    if password_changed:
         user.password_hash = hash_password(password.strip())
+
+    if password_changed or (was_active and not is_active):
+        delete_user_sessions(db, user.id)
 
     create_audit_log(
         db,
@@ -292,7 +316,7 @@ async def user_edit_submit(
     )
 
 
-@router.post("/{user_id}/deactivate")
+@router.post("/{user_id}/deactivate", dependencies=[Depends(require_csrf)])
 async def user_deactivate_submit(
     user_id: int,
     request: Request,
@@ -311,6 +335,7 @@ async def user_deactivate_submit(
 
     if user:
         user.is_active = False
+        delete_user_sessions(db, user.id)
 
         create_audit_log(
             db,

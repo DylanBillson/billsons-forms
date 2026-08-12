@@ -20,6 +20,7 @@
 <section class="card">
 
     <form method="post" action="/admin/users/new" class="form">
+        {% include "partials/csrf.html" %}
 
         <div class="form-group">
             <label for="username">
@@ -63,7 +64,7 @@
             >
 
             <div class="form-help">
-                Required when creating a user.
+                At least 12 characters and must not contain the username.
             </div>
         </div>
 

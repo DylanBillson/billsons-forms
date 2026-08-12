@@ -1,43 +1,83 @@
-services:
-  app:
-    restart: unless-stopped
-    build: .
-    container_name: billsons_forms_app
-    env_file:
-      - .env
-    depends_on:
-      - db
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./:/app
-      - ./data/uploads:/data/uploads
-      - ./data/exports:/data/exports
-      - ./data/generated:/data/generated
-      - ./data/temp:/data/temp
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    networks:
-      - default
-      - edge
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.billsons-forms.rule=Host(`${TRAEFIK_HOST}`)"
-      - "traefik.http.routers.billsons-forms.entrypoints=websecure"
-      - "traefik.http.routers.billsons-forms.tls.certresolver=letsencrypt"
-      - "traefik.http.services.billsons-forms.loadbalancer.server.port=8000"
+x-app: &app
+  image: ghcr.io/dylanbillson/billsons-forms:${IMAGE_TAG:-latest}
+  restart: unless-stopped
+  env_file: [.env]
+  networks: [default]
 
+services:
   db:
     image: postgres:17
     restart: unless-stopped
-    container_name: billsons_forms_db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [default]
+
+  migrate:
+    <<: *app
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "python -m app.scripts.check_config && alembic upgrade head"]
+    healthcheck:
+      disable: true
+
+  app:
+    <<: *app
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--no-proxy-headers"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    networks: [default, edge]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.billsons-forms.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.billsons-forms.entrypoints=websecure"
+      - "traefik.http.routers.billsons-forms.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.billsons-forms.middlewares=billsons-forms-body,billsons-forms-security"
+      - "traefik.http.middlewares.billsons-forms-body.buffering.maxRequestBodyBytes=${ABSOLUTE_MAX_PAYLOAD_BYTES:-1048576}"
+      - "traefik.http.middlewares.billsons-forms-security.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.billsons-forms-security.headers.stsIncludeSubdomains=true"
+      - "traefik.http.services.billsons-forms.loadbalancer.server.port=8000"
+
+  worker:
+    <<: *app
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "app.scripts.run_worker"]
+    healthcheck:
+      disable: true
+
+  cleanup:
+    <<: *app
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "app.scripts.run_cleanup"]
+    healthcheck:
+      disable: true
 
 volumes:
   postgres_data:

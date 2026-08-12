@@ -8,16 +8,34 @@
     <h1>{{ endpoint.name }}</h1>
     <p>{{ endpoint.description or "Endpoint details and recent delivery metadata." }}</p>
 </section>
+{% if notice %}<div class="alert alert-success">{{ notice }}</div>{% endif %}
+{% if test_error %}<div class="alert alert-danger">{{ test_error }}</div>{% endif %}
 
 <section class="page-actions">
     <a href="/endpoints/{{ endpoint.id }}/edit" class="btn btn-primary">Edit Endpoint</a>
     <a href="/endpoints" class="btn">Back to Endpoints</a>
 
     <form method="post" action="/endpoints/{{ endpoint.id }}/delete" class="inline-form">
+        {% include "partials/csrf.html" %}
         <button type="submit" class="btn btn-danger">
             Delete Endpoint
         </button>
     </form>
+</section>
+
+<section class="card">
+    <h2>Test Configuration</h2>
+    <p>Tests do not include stored form data and do not reveal stored secrets.</p>
+    <div class="page-actions">
+        <form method="post" action="/endpoints/{{ endpoint.id }}/test-smtp" class="inline-form">
+            {% include "partials/csrf.html" %}
+            <button type="submit" class="btn">Test SMTP</button>
+        </form>
+        <form method="post" action="/endpoints/{{ endpoint.id }}/test-cap" class="inline-form">
+            {% include "partials/csrf.html" %}
+            <button type="submit" class="btn" {% if not endpoint.cap_enabled %}disabled{% endif %}>Test CAP.js</button>
+        </form>
+    </div>
 </section>
 
 <section class="card">
@@ -86,9 +104,18 @@
         </ul>
     {% else %}
         <p class="muted">
-            No allowed origins configured. Requests without an Origin header are allowed.
+            No allowed origins configured. Origin filtering is disabled for this endpoint.
         </p>
     {% endif %}
+</section>
+
+<section class="card">
+    <h2>Delivery Queue</h2>
+    {% if delivery_jobs %}
+    <div class="table-container"><table class="table"><thead><tr><th>Created</th><th>Status</th><th>Attempts</th><th>Next/terminal time</th></tr></thead><tbody>
+    {% for job in delivery_jobs %}<tr><td>{{ job.created_at.strftime("%d/%m/%Y %H:%M") }}</td><td>{{ job.status }}</td><td>{{ job.attempts }}/{{ job.max_attempts }}</td><td>{{ job.terminal_at or job.available_at }}</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<p class="muted">No queued deliveries yet.</p>{% endif %}
 </section>
 
 <section class="card">

@@ -8,12 +8,7 @@ from app.core.config import settings
 from app.db.base import Base
 
 # Import models here
-from app.db.models import (
-    AuditLog,
-    Setting,
-    User,
-    UserSession,
-)
+import app.db.models  # noqa: F401,E402 - registers every model with Base.metadata
 
 config = context.config
 

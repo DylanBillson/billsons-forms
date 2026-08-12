@@ -1,0 +1,114 @@
+x-dev-app: &dev-app
+  image: billsons-forms:dev
+  build:
+    context: .
+    target: development
+  env_file: [.env]
+  environment:
+    APP_ENV: development
+  volumes:
+    - ./:/app
+  networks: [default]
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [default]
+
+  migrate:
+    <<: *dev-app
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "python -m app.scripts.check_config && alembic upgrade head"]
+    healthcheck:
+      disable: true
+
+  app:
+    <<: *dev-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--no-proxy-headers"]
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    networks: [default, edge]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.billsons-forms-dev.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.billsons-forms-dev.entrypoints=websecure"
+      - "traefik.http.routers.billsons-forms-dev.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.billsons-forms-dev.middlewares=billsons-forms-dev-body,billsons-forms-dev-security"
+      - "traefik.http.middlewares.billsons-forms-dev-body.buffering.maxRequestBodyBytes=${ABSOLUTE_MAX_PAYLOAD_BYTES:-1048576}"
+      - "traefik.http.middlewares.billsons-forms-dev-security.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.billsons-forms-dev-security.headers.stsIncludeSubdomains=true"
+      - "traefik.http.services.billsons-forms-dev.loadbalancer.server.port=8000"
+
+  worker:
+    <<: *dev-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "app.scripts.run_worker"]
+    healthcheck:
+      disable: true
+
+  cleanup:
+    <<: *dev-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "app.scripts.run_cleanup"]
+    healthcheck:
+      disable: true
+
+  test:
+    <<: *dev-app
+    profiles: [test]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: test
+      SECURE_COOKIES: "false"
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/billsons_forms_test
+      TEST_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/billsons_forms_test
+    command: ["python", "-m", "app.scripts.test"]
+    healthcheck:
+      disable: true
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  edge:
+    external: true

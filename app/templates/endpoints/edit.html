@@ -17,8 +17,10 @@
     {{ error }}
 </div>
 {% endif %}
+{% if errors %}<ul class="alert alert-danger">{% for field, message in errors.items() %}<li><strong>{{ field|replace('_', ' ')|title }}:</strong> {{ message }}</li>{% endfor %}</ul>{% endif %}
 
 <form method="post" action="/endpoints/{{ endpoint.id }}/edit" class="endpoint-form">
+    {% include "partials/csrf.html" %}
 
     <section class="card">
 
@@ -236,11 +238,12 @@
                     Verification URL
                 </label>
                 <input
-                    type="text"
+                    type="url"
                     id="cap_verify_url"
                     name="cap_verify_url"
                     value="{{ form.cap_verify_url }}"
                 >
+                <small>Use the full CAP siteverify endpoint. Example: <code>https://cap.example.com/siteverify</code>.</small>
             </div>
 
             <div class="form-group">
@@ -291,8 +294,16 @@
                 >{{ form.allowed_origins }}</textarea>
 
                 <small>
-                    One origin per line.
+                    One bare HTTP/HTTPS origin per line. Paths, credentials and wildcards are rejected. A configured list requires a matching Origin header.
                 </small>
+            </div>
+
+            <div class="form-group">
+                <label><input type="checkbox" name="rate_limit_enabled" value="true" {% if form.rate_limit_enabled %}checked{% endif %}> Enable submission rate limiting</label>
+                <label for="rate_limit_requests">Requests</label>
+                <input type="number" id="rate_limit_requests" name="rate_limit_requests" min="1" max="10000" value="{{ form.rate_limit_requests }}">
+                <label for="rate_limit_window_seconds">Window (seconds)</label>
+                <input type="number" id="rate_limit_window_seconds" name="rate_limit_window_seconds" min="1" max="86400" value="{{ form.rate_limit_window_seconds }}">
             </div>
 
             <div class="form-group">

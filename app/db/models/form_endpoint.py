@@ -48,3 +48,6 @@ class FormEndpoint(TimestampMixin, Base):
 
     # Basic limits
     max_payload_kb: Mapped[int] = mapped_column(Integer, nullable=False, default=256)
+    rate_limit_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    rate_limit_requests: Mapped[int] = mapped_column(Integer, nullable=False, default=30)
+    rate_limit_window_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=60)

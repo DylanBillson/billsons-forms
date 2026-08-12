@@ -1,6 +1,6 @@
 import getpass
 
-from app.auth.passwords import hash_password
+from app.auth.passwords import hash_password, password_errors
 from app.db.models.user import User
 from app.db.session import SessionLocal
 
@@ -12,6 +12,9 @@ def main() -> None:
 
     if not username or not display_name or not password:
         raise SystemExit("Username, display name and password are required.")
+    problems = password_errors(password, username)
+    if problems:
+        raise SystemExit(" ".join(problems))
 
     db = SessionLocal()
 

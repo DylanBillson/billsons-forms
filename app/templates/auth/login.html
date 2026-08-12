@@ -6,6 +6,7 @@
     <title>Login · Billson's Forms</title>
 
     <link rel="stylesheet" href="/static/css/app.css">
+    <script src="/static/js/app.js" defer></script>
 </head>
 <body>
 
@@ -25,6 +26,7 @@
             {% endif %}
 
             <form method="post" action="/login" class="auth-form">
+                {% include "partials/csrf.html" %}
 
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -33,6 +35,7 @@
                         id="username"
                         name="username"
                         required
+                        autocomplete="username"
                         autofocus
                     >
                 </div>
@@ -44,6 +47,7 @@
                         id="password"
                         name="password"
                         required
+                        autocomplete="current-password"
                     >
                 </div>
 

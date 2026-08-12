@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models.audit_log import AuditLog
 from app.db.models.user import User
+from app.core.client_ip import get_client_ip
 
 
 def create_audit_log(
@@ -16,8 +17,8 @@ def create_audit_log(
 ) -> None:
     ip_address = None
 
-    if request and request.client:
-        ip_address = request.client.host
+    if request:
+        ip_address = get_client_ip(request)
 
     audit_log = AuditLog(
         user_id=user.id if user else None,

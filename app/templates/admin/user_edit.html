@@ -20,6 +20,7 @@
 <section class="card">
 
     <form method="post" action="/admin/users/{{ user.id }}/edit" class="form">
+        {% include "partials/csrf.html" %}
 
         <div class="form-group">
             <label for="username">
@@ -62,7 +63,7 @@
             >
 
             <div class="form-help">
-                Leave blank to keep the current password.
+                Leave blank to keep the current password. New passwords require at least 12 characters; changing it invalidates existing sessions.
             </div>
         </div>
 
@@ -181,8 +182,9 @@
     <form
         method="post"
         action="/admin/users/{{ user.id }}/deactivate"
-        onsubmit="return confirm('Disable this user account?');"
+        data-confirm="Disable this user account?"
     >
+        {% include "partials/csrf.html" %}
         <button
             type="submit"
             class="btn btn-danger"
